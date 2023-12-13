@@ -47,6 +47,8 @@ class Gazebo(RockerExtension):
         snippet = pkgutil.get_data(
             'gz_rocker',
             'templates/%s_snippet.Dockerfile.em' % self.name).decode('utf-8')
+        print(snippet)
+        print(self._env_subs)
         return em.expand(snippet, self._env_subs)
 
     def get_docker_args(self, cli_args):
