@@ -1,6 +1,3 @@
-import em
-import os
-import pkgutil
 from rocker.extensions import RockerExtension, name_to_argument
 
 
@@ -34,7 +31,11 @@ class Vol(RockerExtension):
 
     @staticmethod
     def register_arguments(parser, defaults={}):
-        parser.add_argument(name_to_argument(Vol.get_name()),
+        parser.add_argument(
+            name_to_argument(Vol.get_name()),
             metavar='/LOCAL/PATH:/CONTAINER/PATH',
             default=defaults.get(Vol.get_name(), None),
-            help="Mount files on your machine into the container via Docker volumes. When specifying local paths, absolute paths must be used. Multiple volumes can be passed in, but must be separated by '::'.")
+            help="Mount files on your machine into the container via Docker \
+                  volumes. When specifying local paths, absolute paths must \
+                  be used. Multiple volumes can be passed in, but must be \
+                  separated by '::'.")
