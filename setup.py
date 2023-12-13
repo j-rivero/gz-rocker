@@ -20,7 +20,7 @@ setuptools.setup(
     ],
     entry_points={
         'rocker.extensions': [
-            'gazebo = gz_rocker.gazebo.Gazebo',
+            'gazebo = gz_rocker.gazebo:Gazebo',
             'vol = gz_rocker.vol:Vol',
         ]
     }
