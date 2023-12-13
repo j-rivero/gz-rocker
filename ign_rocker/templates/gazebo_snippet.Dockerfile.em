@@ -17,12 +17,12 @@ RUN apt-get -qq update && apt-get -y --no-install-recommends install \
     # used to install colcon, vcstool and psutil
     python3-pip \
     wget \
-    # xdg-utils allows for users to open remotery (profiler in ign-common) in Docker
+    # xdg-utils allows for users to open remotery (profiler in gz-common) in Docker
     xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 
-# set up repositories for Ignition
-# (add nightlies in case users want the newest Ignition version)
+# set up repositories for Gazebo
+# (add nightlies in case users want the newest Gazebo version)
 RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
   && sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-nightly `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-nightly.list' \
   && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
@@ -31,22 +31,22 @@ RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb
 RUN pip3 install setuptools wheel \
   && pip3 install colcon-common-extensions vcstool psutil
 
-# install the specified Ignition version
+# install the specified Gazebo version
 RUN apt-get -qq update && apt-get -y --no-install-recommends install \
-    ignition-@(ign_distro) \
+    gz-@(gz_distro) \
   && rm -rf /var/lib/apt/lists/*
 
-# install remaining build dependencies for the specified Ignition version
-# (in case users want to build Ignition repositories from source)
+# install remaining build dependencies for the specified Gazebo version
+# (in case users want to build Gazebo repositories from source)
 RUN mkdir /temp_repos \
   && cd /temp_repos \
-  && wget https://raw.githubusercontent.com/ignition-tooling/gazebodistro/master/collection-@(ign_distro).yaml \
-  && vcs import < collection-@(ign_distro).yaml \
+  && wget https://raw.githubusercontent.com/gazebo-tooling/gazebodistro/master/collection-@(gz_distro).yaml \
+  && vcs import < collection-@(gz_distro).yaml \
   && apt-get -qq update && apt-get -y --no-install-recommends install \
-    $(sort -u $(find . -iname 'packages-@(system_version).apt' -o -iname 'packages.apt') | grep -Ev 'libignition|libsdformat' | tr '\n' ' ') \
+    $(sort -u $(find . -iname 'packages-@(system_version).apt' -o -iname 'packages.apt') | grep -Ev 'libgz|libsdformat' | tr '\n' ' ') \
   && rm -rf /var/lib/apt/lists/* \
   && cd / \
   && rm -rf /temp_repos
 
-# configure gcc-8 and g++-8 as default in case users want to modify the Ignition source code
+# configure gcc-8 and g++-8 as default in case users want to modify the Gazebo source code
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
