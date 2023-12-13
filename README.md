@@ -78,13 +78,13 @@ You can also extend the Bionic and Focal images to include things like custom di
 
 ### Rocker Arguments
 
-* `--ignition $IGNITION_VERSION:$SYSTEM_VERSION`: Adds a binary installation of the Ignition Robotics libraries to the container.
-`$IGNITION_VERSION` specifies the version of ignition to install, and `$SYSTEM_VERSION` specifies the platform the base Docker image uses.
-`$SYSTEM_VERSION` must be specified so that all platform-specific build dependencies for `$IGNITION_VERSION` can be installed (this provides users with the option to build Ignition repositories from source).
+* `--gazebo $GAZEBO_VERSION:$SYSTEM_VERSION`: Adds a binary installation of the Gazebo libraries to the container.
+`$GAZEBO_VERSION` specifies the version of gazebo to install, and `$SYSTEM_VERSION` specifies the platform the base Docker image uses.
+`$SYSTEM_VERSION` must be specified so that all platform-specific build dependencies for `$GAZEBO_VERSION` can be installed (this provides users with the option to build gazebo repositories from source).
 This argument also installs supporting tools for building source code (colcon), modifying documentation (doxygen and firefox), running tests, and running the static code checker (cppcheck).
-Use the command `rocker -h` to see the valid options for `$IGNITION_VERSION` and `$SYSTEM_VERSION`.
+Use the command `rocker -h` to see the valid options for `$GAZEBO_VERSION` and `$SYSTEM_VERSION`.
 
-_Example: To run Ignition Citadel on Ubuntu Bionic, you'd enter `--ignition citadel:bionic` and use `ubuntu:bionic` as the image argument for rocker._
+_Example: To run gazebo Citadel on Ubuntu Bionic, you'd enter `--gazebo citadel:bionic` and use `ubuntu:bionic` as the image argument for rocker._
 
 * `--vol /LOCAL/PATH:/CONTAINER/PATH[::/LOCAL/PATH:/CONTAINER/PATH ...]`: Mount files on your machine into the container via Docker volumes.
 When specifying local paths, absolute paths must be used.
@@ -98,22 +98,22 @@ Start a container that has Gazebo Citadel installed, along with enabling Nvidia 
 In this example, we are using Gazebo Citadel in Ubuntu Bionic:
 
 ```
-rocker --nvidia --x11 --ignition citadel:bionic ubuntu:bionic bash
+rocker --nvidia --x11 --gazebo citadel:bionic ubuntu:bionic bash
 ```
 
 Then, test out Gazebo Gazebo by running the following command in the container:
 
 ```
-gz gazebo -r actor.sdf
+gz sim -r actor.sdf
 ```
 
 ### Using source installations of Gazebo libraries
 
 1. Determine which Gazebo version you need (visit the [releases](https://gazebosim.org/docs) page for more information).
-Once you've decided, set an environment variable corresponding to your version (make sure to pick a version that's compatible with the `--ignition` argument - use the command `rocker -h` to see what can be used with `--ignition`):
+Once you've decided, set an environment variable corresponding to your version (make sure to pick a version that's compatible with the `--gazebo` argument - use the command `rocker -h` to see what can be used with `--gazebo`):
 
 ```
-export IGN_DISTRO=citadel
+export GZ_DISTRO=citadel
 ```
 
 2. Clone the Gazebo respositories you'd like to use for development/testing.
@@ -130,16 +130,16 @@ Now, you can clone the repositories you need.
 The easiest way to do this is by running the following commands, which clones the whole Gazebo collection with the right branches for the version you specified in step 1 (then, you can just remove whatever repositories you don't need):
 
 ```
-wget 'https://raw.githubusercontent.com/gazebo-tooling/gazebodistro/master/collection-'$IGN_DISTRO'.yaml'
-vcs import < 'collection-'$IGN_DISTRO'.yaml'
+wget 'https://raw.githubusercontent.com/gazebo-tooling/gazebodistro/master/collection-'$GZ_DISTRO'.yaml'
+vcs import < 'collection-'$GZ_DISTRO'.yaml'
 ```
 
 3. Go ahead and make changes to the repositories as needed (make commits, check out branches/pull requests, etc.).
-Once you are ready to use/test the ignition repositories on your machine, you can start a container that will load your workspace as a volume (here, we're creating a colcon workspace in the container at `$HOME/ws/`, so the repositories will be mounted into this workspace at `$HOME/ws/src/`.
+Once you are ready to use/test the gazebo repositories on your machine, you can start a container that will load your workspace as a volume (here, we're creating a colcon workspace in the container at `$HOME/ws/`, so the repositories will be mounted into this workspace at `$HOME/ws/src/`.
 This assumes you have the `$HOME` environment variable defined on your machine locally):
 
 ```
-rocker --nvidia --x11 --user --ignition $IGN_DISTRO:bionic --vol $COLCON_WS_PATH:$HOME/ws/ ubuntu:bionic bash
+rocker --nvidia --x11 --user --gazebo $GZ_DISTRO:bionic --vol $COLCON_WS_PATH:$HOME/ws/ ubuntu:bionic bash
 ```
 
 4. Go to the root of the colcon workspace inside of the Docker container:
@@ -149,7 +149,7 @@ cd ~/ws
 ```
 
 5. Build the colcon workspace.
-If [ign-physics](https://github.com/gazebosim/ign-physics) is one of the repositories you're using, you may want to disable building the tests to speed up build time:
+If [gz-physics](https://github.com/gazebosim/gz-physics) is one of the repositories you're using, you may want to disable building the tests to speed up build time:
 
 ```
 colcon build --merge-install --cmake-args -DCMAKE_BUILD_TESTING=0
@@ -173,12 +173,12 @@ _If you use a mix of source and binary Gazebo installations, you may need to spe
 
 ### Using a project that depends on Gazebo
 
-If you're working on a project that depends on Gazebo, you can load your project files into the container as a volume (be sure to update `$IGN_DISTRO`, `$PROJECT_PATH`, and `$CONTAINER_PATH`):
+If you're working on a project that depends on Gazebo, you can load your project files into the container as a volume (be sure to update `$GZ_DISTRO`, `$PROJECT_PATH`, and `$CONTAINER_PATH`):
 
 ```
-rocker --nvidia --x11 --user --ignition $IGN_DISTRO:bionic --vol $PROJECT_PATH:$CONTAINER_PATH ubuntu:bionic bash
+rocker --nvidia --x11 --user --gazebo $GZ_DISTRO:bionic --vol $PROJECT_PATH:$CONTAINER_PATH ubuntu:bionic bash
 ```
 
-This command is identical to the command used to load Gazebo repositories into the container in the [Using source installations of Gazebo libraries](#using-source-installations-of-ignition-libraries) section, replacing `$COLCON_WS_PATH` with `$PROJECT_PATH`.
+This command is identical to the command used to load Gazebo repositories into the container in the [Using source installations of Gazebo libraries](#using-source-installations-of-gazebo-libraries) section, replacing `$COLCON_WS_PATH` with `$PROJECT_PATH`.
 
 Now, all you need to do is build your project's source code inside of the container, and you now have your project configured with Gazebo!
