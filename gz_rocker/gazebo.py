@@ -11,11 +11,11 @@ class Gazebo(RockerExtension):
 
     @staticmethod
     def get_releases():
-        return {'citadel', 'dome', 'edifice', 'fortress'}
+        return {'citadel', 'fortress', 'garden', 'harmonic'}
 
     @staticmethod
     def get_OSs():
-        return {'bionic', 'focal'}
+        return {'focal', 'jammy'}
 
     def __init__(self):
         self._env_subs = {}

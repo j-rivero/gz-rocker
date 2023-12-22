@@ -4,14 +4,13 @@ RUN apt-get -qq update && DEBIAN_FRONTEND=noninteractive apt-get -y --no-install
   && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get -qq update && apt-get -y --no-install-recommends install \
+    build-essential \
     cppcheck \
     doxygen \
     firefox \
-    gcc \
     # need git in order to use vcstool
     git \
     gnupg \
-    g++-8 \
     lsb-release \
     python3-dev \
     # used to install colcon, vcstool and psutil
@@ -23,9 +22,9 @@ RUN apt-get -qq update && apt-get -y --no-install-recommends install \
 
 # set up repositories for Gazebo
 # (add nightlies in case users want the newest Gazebo version)
-RUN sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
-  && sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-nightly `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-nightly.list' \
-  && wget http://packages.osrfoundation.org/gazebo.key -O - | apt-key add -
+RUN sh -c 'wget -qq https://packages.osrfoundation.org/gazebo.gpg -O /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg' \
+  && sh -c 'echo "deb [arch=`dpkg --print-architecture` signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' \
+  && sh -c 'echo "deb [arch=`dpkg --print-architecture` signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-nightly `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-nightly.list'
 
 # install colcon, vcstool and psutil (psutil is for sdformat memory leak tests)
 RUN pip3 install setuptools wheel \
@@ -47,6 +46,3 @@ RUN mkdir /temp_repos \
   && rm -rf /var/lib/apt/lists/* \
   && cd / \
   && rm -rf /temp_repos
-
-# configure gcc-8 and g++-8 as default in case users want to modify the Gazebo source code
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8 --slave /usr/bin/gcov gcov /usr/bin/gcov-8
